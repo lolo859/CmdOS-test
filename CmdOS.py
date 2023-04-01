@@ -1045,125 +1045,7 @@ def login():
             cmdf.clear()
             print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
             if compte=="1":
-                valida="no"
-                while valida!="ok":
-                    repsql=[]
-                    repname=input("Taper votre nom d'utilisateur : ")
-                    repmdp=input("Taper votre mot de passe : ")
-                    cur.execute("SELECT * FROM utilisateur WHERE nom='"+repname+"';")
-                    repsqluser=cur.fetchall()
-                    cur.execute("SELECT * FROM settings WHERE nom='"+repname+"';")
-                    repsqlset=cur.fetchall()
-                    repsqluser=list(repsqluser[0])
-                    repsqlset=list(repsqlset[0])
-                    if repsqluser==[]:
-                        cmdf.clear()
-                        print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                        print(colored("Le compte n'existe pas","red",attrs=["bold"]))
-                    else:
-                        repsql=list(repsql[0])
-                        if repmdp==indecode.decode(repsqluser[1],repsqluser[3]):
-                            os.makedirs("user/"+repname+"/image")
-                            os.makedirs("user/"+repname+"/music")
-                            os.makedirs("user/"+repname+"/save_module")
-                            os.makedirs("user/"+repname+"/download")
-                            app=appinitext(repname)
-                            adresse=adresse+"/user/"+repname
-                            adresseuser=adresse
-                            valida="ok"
-                        else:
-                            cmdf.clear()
-                            print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                            print(colored("Le mot de passe n'est pas correct","red",attrs=["bold"]))
-                mdpt=indecode.decode(repsqluser[1],repsqluser[3])
-                admin=repsqluser[2]
-                displaysplit=repsqlset[1]
-                logserver=repsqlset[3]
-                charginstall=repsqlset[2]
-                key=repsqluser[3]
-                cmdf.clear()
-                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                print("""Taper "help" pour plus d'information""")
-                cmd(admin,charginstall,displaysplit,logserver,repname,mdpt,adresseuser)
-                return
-            elif compte=="2":
-                valida="no"
-                while valida!="ok":
-                    repname=input("Entrer un nom d'utilisateur (pas plus de 50 caractères) : ")
-                    repmdp=input("Entrer un mot de passe (pas plus de 50 caractères) : ")
-                    if not len(repname)>=50 and not len(repmdp)>=50:
-                        if repmdp=="shutdown":
-                            cmdf.clear()
-                            print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                            print(colored("Le mot de passe ne peut pas être 'shutdown'","red",attrs=["bold"]))
-                        else:
-                            try:
-                                key=indecode.generate_key()
-                                commandsql="INSERT INTO utilisateur VALUES ('"+str(repname)+"','"+str(indecode.code(repmdp,key))+"',0,'"+key+"');"
-                                cur.execute(commandsql)
-                                connsql.commit()
-                                commandsql="INSERT INTO settings VALUES ('"+str(repname)+"',0,1,1);"
-                                cur.execute(commandsql)
-                                connsql.commit()
-                                os.makedirs("user/"+repname+"/image")
-                                os.makedirs("user/"+repname+"/music")
-                                os.makedirs("user/"+repname+"/save_module")
-                                os.makedirs("user/"+repname+"/download")
-                                app=appinitext(repname)
-                                adresse=adresse+"/user/"+repname
-                                adresseuser=adresse
-                                valida="ok"
-                            except psycopg2.errors.UniqueViolation:
-                                cmdf.clear()
-                                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                                print(colored("Le nom d'utilisateur est déja pris","red",attrs=["bold"]))
-                    else:
-                        cmdf.clear()
-                        print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                        print(colored("Une valeur entrée n'est pas valide","red",attrs=["bold"]))
-                mdpt=repmdp
-                admin=0
-                displaysplit=0
-                logserver=1
-                charginstall=1
-                cmdf.clear()
-                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                print("""Taper "help" pour plus d'information""")
-                cmd(admin,charginstall,displaysplit,logserver,repname,mdpt,adresseuser,key)
-                return
-            elif compte=="3":
-                mdpt=0
-                admin=0
-                displaysplit=0
-                logserver=0
-                charginstall=0
-                invit=1
-                repname="Guest"
-                adresseuser=adresse
-                key=indecode.generate_key()
-                cmdf.clear()
-                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                print("""Taper "help" pour plus d'information""")
-                cmd(admin,charginstall,displaysplit,logserver,repname,mdpt,adresseuser,key,invit)
-                return
-            elif compte=="4":
-                cmdf.clear()
-                exit()
-            else:
-                cmdf.clear()
-                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                print(colored("La valeur entrée n'est pas valide","red",attrs=["bold"]))
-        else:
-            while True:
-                print("Selectionner une option ou taper le nom d'un compte existant sur la machine : \n 1 - Ajouter un compte existant\n 2 - Créer un compte\n 3 - Démarrer le moe invité\n 4 - Eteindre")
-                fichiers=os.listdir(adresse+"/user")
-                longueur=len(fichiers)
-                for element in range(longueur):
-                    print(" "+fichiers[element]+" - se connecter avec ce compte")
-                rep=input("Votre choix : ")
-                cmdf.clear()
-                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                if rep=="1":
+                if cmdf.connect():
                     valida="no"
                     while valida!="ok":
                         repsql=[]
@@ -1180,26 +1062,37 @@ def login():
                             print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
                             print(colored("Le compte n'existe pas","red",attrs=["bold"]))
                         else:
+                            repsql=list(repsql[0])
                             if repmdp==indecode.decode(repsqluser[1],repsqluser[3]):
-                                try:
-                                    os.makedirs("user/"+repname+"/image")
-                                    os.makedirs("user/"+repname+"/music")
-                                    os.makedirs("user/"+repname+"/save_module")
-                                    os.makedirs("user/"+repname+"/download")
-                                    app=appinitext(repname)
-                                    adresse=adresse+"/user/"+repname
-                                    adresseuser=adresse
-                                    mdpt=repmdp
-                                    valida="ok"
-                                except FileExistsError:
-                                    cmdf.clear()
-                                    print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
-                                    print(colored("Le compte est déja ajouté","red",attrs=["bold"]))
+                                os.makedirs("user/"+repname+"/image")
+                                os.makedirs("user/"+repname+"/music")
+                                os.makedirs("user/"+repname+"/save_module")
+                                os.makedirs("user/"+repname+"/download")
+                                app=appinitext(repname)
+                                adresse=adresse+"/user/"+repname
+                                adresseuser=adresse
+                                valida="ok"
                             else:
                                 cmdf.clear()
                                 print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
                                 print(colored("Le mot de passe n'est pas correct","red",attrs=["bold"]))
-                elif rep=="2":
+                    mdpt=indecode.decode(repsqluser[1],repsqluser[3])
+                    admin=repsqluser[2]
+                    displaysplit=repsqlset[1]
+                    logserver=repsqlset[3]
+                    charginstall=repsqlset[2]
+                    key=repsqluser[3]
+                    cmdf.clear()
+                    print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                    print("""Taper "help" pour plus d'information""")
+                    cmd(admin,charginstall,displaysplit,logserver,repname,mdpt,adresseuser)
+                    return
+                else:
+                    cmdf.clear()
+                    print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                    print(colored("Vous devez être connecté à internet pour vous connecter","red",attrs=["bold"]))
+            elif compte=="2":
+                if cmdf.connect():
                     valida="no"
                     while valida!="ok":
                         repname=input("Entrer un nom d'utilisateur (pas plus de 50 caractères) : ")
@@ -1225,13 +1118,6 @@ def login():
                                     app=appinitext(repname)
                                     adresse=adresse+"/user/"+repname
                                     adresseuser=adresse
-                                    mdpt=repmdp
-                                    cur.execute("SELECT * FROM utilisateur WHERE nom='"+repname+"';")
-                                    repsqluser=cur.fetchall()
-                                    cur.execute("SELECT * FROM settings WHERE nom='"+repname+"';")
-                                    repsqlset=cur.fetchall()
-                                    repsqluser=list(repsqluser[0])
-                                    repsqlset=list(repsqlset[0])
                                     valida="ok"
                                 except psycopg2.errors.UniqueViolation:
                                     cmdf.clear()
@@ -1241,6 +1127,140 @@ def login():
                             cmdf.clear()
                             print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
                             print(colored("Une valeur entrée n'est pas valide","red",attrs=["bold"]))
+                    mdpt=repmdp
+                    admin=0
+                    displaysplit=0
+                    logserver=1
+                    charginstall=1
+                    cmdf.clear()
+                    print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                    print("""Taper "help" pour plus d'information""")
+                    cmd(admin,charginstall,displaysplit,logserver,repname,mdpt,adresseuser,key)
+                    return
+                else:
+                    cmdf.clear()
+                    print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                    print(colored("Vous devez être connecté à internet pour vous connecter","red",attrs=["bold"]))
+            elif compte=="3":
+                mdpt=0
+                admin=0
+                displaysplit=0
+                logserver=0
+                charginstall=0
+                invit=1
+                repname="Guest"
+                adresseuser=adresse
+                key=indecode.generate_key()
+                cmdf.clear()
+                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                print("""Taper "help" pour plus d'information""")
+                cmd(admin,charginstall,displaysplit,logserver,repname,mdpt,adresseuser,key,invit)
+                return
+            elif compte=="4":
+                cmdf.clear()
+                exit()
+            else:
+                cmdf.clear()
+                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                print(colored("La valeur entrée n'est pas valide","red",attrs=["bold"]))
+        else:
+            while True:
+                print("Selectionner une option ou taper le nom d'un compte existant sur la machine : \n 1 - Ajouter un compte existant\n 2 - Créer un compte\n 3 - Démarrer le mode invité\n 4 - Eteindre")
+                fichiers=os.listdir(adresse+"/user")
+                longueur=len(fichiers)
+                for element in range(longueur):
+                    print(" "+fichiers[element]+" - se connecter avec ce compte")
+                rep=input("Votre choix : ")
+                cmdf.clear()
+                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                if rep=="1":
+                    valida="no"
+                    if cmdf.connect():
+                        while valida!="ok":
+                            repsql=[]
+                            repname=input("Taper votre nom d'utilisateur : ")
+                            repmdp=input("Taper votre mot de passe : ")
+                            cur.execute("SELECT * FROM utilisateur WHERE nom='"+repname+"';")
+                            repsqluser=cur.fetchall()
+                            cur.execute("SELECT * FROM settings WHERE nom='"+repname+"';")
+                            repsqlset=cur.fetchall()
+                            repsqluser=list(repsqluser[0])
+                            repsqlset=list(repsqlset[0])
+                            if repsqluser==[]:
+                                cmdf.clear()
+                                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                                print(colored("Le compte n'existe pas","red",attrs=["bold"]))
+                            else:
+                                if repmdp==indecode.decode(repsqluser[1],repsqluser[3]):
+                                    try:
+                                        os.makedirs("user/"+repname+"/image")
+                                        os.makedirs("user/"+repname+"/music")
+                                        os.makedirs("user/"+repname+"/save_module")
+                                        os.makedirs("user/"+repname+"/download")
+                                        app=appinitext(repname)
+                                        adresse=adresse+"/user/"+repname
+                                        adresseuser=adresse
+                                        mdpt=repmdp
+                                        valida="ok"
+                                    except FileExistsError:
+                                        cmdf.clear()
+                                        print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                                        print(colored("Le compte est déja ajouté","red",attrs=["bold"]))
+                                else:
+                                    cmdf.clear()
+                                    print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                                    print(colored("Le mot de passe n'est pas correct","red",attrs=["bold"]))
+                    else:
+                        cmdf.clear()
+                        print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                        print(colored("Vous devez être connecté à internet pour vous connecter","red",attrs=["bold"]))
+                elif rep=="2":
+                    valida="no"
+                    if cmdf.connect():
+                        while valida!="ok":
+                            repname=input("Entrer un nom d'utilisateur (pas plus de 50 caractères) : ")
+                            repmdp=input("Entrer un mot de passe (pas plus de 50 caractères) : ")
+                            if not len(repname)>=50 and not len(repmdp)>=50:
+                                if repmdp=="shutdown":
+                                    cmdf.clear()
+                                    print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                                    print(colored("Le mot de passe ne peut pas être 'shutdown'","red",attrs=["bold"]))
+                                else:
+                                    try:
+                                        key=indecode.generate_key()
+                                        commandsql="INSERT INTO utilisateur VALUES ('"+str(repname)+"','"+str(indecode.code(repmdp,key))+"',0,'"+key+"');"
+                                        cur.execute(commandsql)
+                                        connsql.commit()
+                                        commandsql="INSERT INTO settings VALUES ('"+str(repname)+"',0,1,1);"
+                                        cur.execute(commandsql)
+                                        connsql.commit()
+                                        os.makedirs("user/"+repname+"/image")
+                                        os.makedirs("user/"+repname+"/music")
+                                        os.makedirs("user/"+repname+"/save_module")
+                                        os.makedirs("user/"+repname+"/download")
+                                        app=appinitext(repname)
+                                        adresse=adresse+"/user/"+repname
+                                        adresseuser=adresse
+                                        mdpt=repmdp
+                                        cur.execute("SELECT * FROM utilisateur WHERE nom='"+repname+"';")
+                                        repsqluser=cur.fetchall()
+                                        cur.execute("SELECT * FROM settings WHERE nom='"+repname+"';")
+                                        repsqlset=cur.fetchall()
+                                        repsqluser=list(repsqluser[0])
+                                        repsqlset=list(repsqlset[0])
+                                        valida="ok"
+                                    except psycopg2.errors.UniqueViolation:
+                                        cmdf.clear()
+                                        print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                                        print(colored("Le nom d'utilisateur est déja pris","red",attrs=["bold"]))
+                            else:
+                                cmdf.clear()
+                                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                                print(colored("Une valeur entrée n'est pas valide","red",attrs=["bold"]))
+                    else:
+                        cmdf.clear()
+                        print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                        print(colored("Vous devez être connecté à internet pour vous connecter","red",attrs=["bold"]))
                 elif rep=="3":
                     mdpt=0
                     admin=0
@@ -1286,7 +1306,10 @@ def login():
                                     print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
                                     print(colored("Le mot de passe n'est pas correct","red",attrs=["bold"]))
                             else:
-                                print("Vous devez être connecté à internet pour vous connecter")
+                                cmdf.clear()
+                                print(colored(("CmdOS v"+version),"green",attrs=["bold"]))
+                                print(colored("Vous devez être connecté à internet pour vous connecter","red",attrs=["bold"]))
+                                break
                         else:
                             return
                 else:
